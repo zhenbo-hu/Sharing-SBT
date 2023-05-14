@@ -12,6 +12,10 @@ contract SharingSBT is ERC721Upgradeable, ERC721URIStorageUpgradeable, ERC721Bur
 
     CountersUpgradeable.Counter private _tokenIdCounter;
 
+    mapping(uint256 => address) private _tokenOwners;
+
+    mapping(address => uint256) private _ownerTokens;
+
     function initialize() public initializer {
         __ERC721_init("SharingSBT", "SSBT");
         __Ownable_init();
@@ -23,11 +27,16 @@ contract SharingSBT is ERC721Upgradeable, ERC721URIStorageUpgradeable, ERC721Bur
     }
 
     function mint(address to) public onlyOwner {
+        require(_ownerTokens[to] != 0, "SharingSBT: everyone only can have one Sharing soul bound token");
+
         // counter start from 1
         _tokenIdCounter.increment();
         uint256 tokenId = _tokenIdCounter.current();
-        
+
         _safeMint(to, tokenId);
+
+        _tokenOwners[tokenId] = to;
+        _ownerTokens[to] = tokenId;
     }
 
     function _burn(uint256 tokenId) internal override(ERC721Upgradeable, ERC721URIStorageUpgradeable) {
